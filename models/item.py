@@ -22,12 +22,16 @@ class ItemModel(db.Model):
         self.store_id = store_id
     
     def json(self):
-        return {'name': self.name, 'price': self.price}
+        return {'id': self.id ,'name': self.name, 'price': self.price, 'store_id': self.store_id}
     
     @classmethod
     def find_by_name(cls, name):
         #'query' viene ya en db.Model, y podemos utilizarlo para crear consultas
         return cls.query.filter_by(name = name).first()   #SELECT * FROM items WHERE name = name LIMIT 1
+    
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
     
     def save_to_db(self):
         #Session es una colección de objetos que escribiremos en la base de datos
