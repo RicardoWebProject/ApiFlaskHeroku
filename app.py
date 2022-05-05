@@ -30,6 +30,7 @@ else:
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(uri, 'sqlite:///data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 app.secret_key = 'ricardo'
 api = Api(app)
