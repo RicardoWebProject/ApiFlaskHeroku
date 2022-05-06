@@ -2,7 +2,7 @@ import sqlite3
 from flask_restful import Resource, reqparse
 #Un Resource (recurso) es algo que nuestra API puede devolver
 #Cada Resource debe ser una clase
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from models.item import ItemModel
 
 class Item(Resource):
@@ -18,6 +18,7 @@ class Item(Resource):
             return item.json()
         return {'message': 'Item not found'}, 404
     
+    @jwt_required(refresh=True)
     def post(self, name):
         if ItemModel.find_by_name(name):
             # return {'message': "An item with name '{}' already exists.".format(name)}, 400
@@ -46,7 +47,15 @@ class Item(Resource):
         # items.append(item)
         # return item, 201
     
+    @jwt_required()
     def delete(self, name):
+        #cambia de 'get_jwt_claims()' a solamente 'get_jwt()' según documentación actual
+        claims = get_jwt()
+        
+        #Si lo que retorna no es 'is_admin', entonces se arroja mensaje de error
+        if not claims['is_admin']:
+            return {'message': 'Se requieren privilegios de administrador.'}, 401
+        
         item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
@@ -84,11 +93,18 @@ class Item(Resource):
         # return item
 
 class ItemList (Resource):
+    @jwt_required(optional=True)
     def get(self):
-        return {
-            'items': [x.json() for x in ItemModel.find_all()]
-            # 'items': list(map(lambda x: x.json(), ItemModel.query.all()))
-        }
+        user_id = get_jwt_identity()
+        items = [x.json() for x in ItemModel.find_all()]
+        
+        if user_id:
+            return {
+                'items': items
+                # 'items': list(map(lambda x: x.json(), ItemModel.query.all()))
+            }, 200
+        return {'items': [x['name'] for x in items], 'message': 'Más información disponible si te logueas.'}
+        
         # connection = sqlite3.connect('data.db')
         # cursor = connection.cursor()
         
