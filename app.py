@@ -42,12 +42,12 @@ api = Api(app)
 jwt = JWTManager(app)  #/auth
 # jwt = JWT(app, authenticate, identity)  # ya no crea /auth
 
-#Cambia a additional_claims_loader según la documentación actual
-@jwt.additional_claims_loader
-def add_claims_to_jwt(identity):
-    if identity == 1:   #En lugar de codificarlo, con esto debería de poder leerse un archivo desde configuración o una bd
-        return {'is_admin': True}
-    return {'is_admin': False}
+#Cambia a additional_claims_loader según la documentación actual, en lugar de user_claims_loader
+# @jwt.additional_claims_loader
+# def add_claims_to_jwt(identity):
+#     if identity == 1:   #En lugar de codificarlo, con esto debería de poder leerse un archivo desde configuración o una bd
+#         return {'is_admin': True}
+#     return {'is_admin': False}
 
 # @jwt.token_in_blacklist_loader
 #Ahora se reciben dos argumentos al usar este decorador: jwt_header y jwt_payload, que es un diccionario con el contenido del token
