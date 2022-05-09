@@ -1,28 +1,35 @@
-import sqlite3
 from flask_restful import Resource, reqparse
 #Un Resource (recurso) es algo que nuestra API puede devolver
 #Cada Resource debe ser una clase
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from models.item import ItemModel
 
+BLANK_ERROR = '{} no puede estar en blanco.'
+NAME_ALREADY_EXISTS = 'Un item con el nombre "{}" ya existe.'
+ITEM_NOT_FOUND = 'Item no econtrado'
+ERROR_INSERTING = 'Ha ocurrido un error ingresando el item.'
+ITEM_DELETED = 'Item eliminado.'
+
 class Item(Resource):
     parser = reqparse.RequestParser() # -> esto sólo inicializa un nuevo objeto  que podemos usar para analizar la solicitud
     # parser.add_argument('name', type=str, required=True, help='Este campo no puede estar vacío')
-    parser.add_argument('price', type=float, required=True, help='Este campo no puede estar en blanco.')
-    parser.add_argument('store_id', type=int, required=True, help='Todos los items necesitan un id de tienda')
+    parser.add_argument('price', type=float, required=True, help=BLANK_ERROR.format('price'))
+    parser.add_argument('store_id', type=int, required=True, help=BLANK_ERROR.format('store_id'))
     
     #@jwt_required()
-    def get(self, name: str):
+    @classmethod
+    def get(cls, name: str):
         item = ItemModel.find_by_name(name)
         if item:
             return item.json()
-        return {'message': 'Item not found'}, 404
+        return {'message': ITEM_NOT_FOUND}, 404
     
+    @classmethod
     @jwt_required(refresh=True)
-    def post(self, name: str):
+    def post(cls, name: str):
         if ItemModel.find_by_name(name):
             # return {'message': "An item with name '{}' already exists.".format(name)}, 400
-            return {'message': f'un item con el nombre {name} ya existe.'}, 400
+            return {'message': NAME_ALREADY_EXISTS.format(name)}, 400
 
         data = Item.parser.parse_args()
 
@@ -32,7 +39,7 @@ class Item(Resource):
         try:
             item.save_to_db()
         except:
-            return {"message": "Ha ocurrido un error ingresando el item."}, 500
+            return {"message": ERROR_INSERTING}, 500
 
         return item.json(), 201
         # if next(filter(lambda x: x['name'] == name, items), None) is not None:
@@ -47,8 +54,9 @@ class Item(Resource):
         # items.append(item)
         # return item, 201
     
+    @classmethod
     @jwt_required()
-    def delete(self, name: str):
+    def delete(cls, name: str):
         # #cambia de 'get_jwt_claims()' a solamente 'get_jwt()' según documentación actual
         # claims = get_jwt()
         # #Si lo que retorna no es 'is_admin', entonces se arroja mensaje de error
@@ -58,14 +66,15 @@ class Item(Resource):
         item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
-            return {'message': 'Item eliminado.'}
-        return {'message': 'Item no encontrado.'}, 404
+            return {'message': ITEM_DELETED}
+        return {'message': ITEM_NOT_FOUND}, 404
         
         # global items
         # items = list(filter(lambda x: x['name'] != name, items))
         # return {'message': 'Item eliminado'}
     
-    def put(self, name: str):
+    @classmethod
+    def put(cls, name: str):
         data = Item.parser.parse_args()
 
         item = ItemModel.find_by_name(name)
@@ -93,7 +102,8 @@ class Item(Resource):
 
 class ItemList (Resource):
     #@jwt_required(optional=True)
-    def get(self):
+    @classmethod
+    def get(cls):
         # user_id = get_jwt_identity()
         # items = [x.json() for x in ItemModel.find_all()]
         
