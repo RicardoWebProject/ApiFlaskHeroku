@@ -6,6 +6,9 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
 from resources.store import Store, StoreList
+from marshmallow import ValidationError
+
+from ma import ma
 from db import db
 # from security import authenticate, identity
 from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
@@ -15,7 +18,7 @@ from resources.item import Item, ItemList
 app = Flask(__name__)
 
 ###########################################################
-app.config['DEBUG'] = False
+app.config['DEBUG'] = True
 
 uri = os.getenv('DATABASE_URL')
 
@@ -37,6 +40,10 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 ##########################################################
 app.secret_key = 'ricardo'  #app.config['JWT_SECRET_KEY']
 api = Api(app)
+
+@app.errorhandler(ValidationError)
+def handle_marshmallow_validation(err):
+    return jsonify(err.messages), 400
 
 ##########################################################
 jwt = JWTManager(app)  #/auth
@@ -95,6 +102,7 @@ api.add_resource(TokenRefresh, '/refresh')
 if __name__ == '__main__':
     #iniciación de objeto db para la aplicación Flask
     db.init_app(app)
+    ma.init_app(app)
 
     if app.config['DEBUG']:
         @app.before_first_request
