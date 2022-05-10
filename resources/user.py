@@ -1,5 +1,6 @@
 from hashlib import new
-from flask_restful import Resource, reqparse
+from flask import request
+from flask_restful import Resource
 from blacklist import BLACKLIST
 from models.user import UserModel
 from flask_jwt_extended import (
@@ -9,7 +10,8 @@ from flask_jwt_extended import (
         get_jwt_identity, 
         get_jwt
     )
-
+from schemas.user import UserSchema
+from marshmallow import ValidationError
 
 BLANK_ERROR = '{} no puede estar en blanco.'
 NAME_ALREADY_EXISTS = 'El username ya existe. Pruebe con otro.'
@@ -20,33 +22,24 @@ USER_CREATED = 'Usuario creado correctamente'
 INVALID_CREDENTIALS = 'Credenciales inválidas'
 USER_LOGOUT = 'Usuario <id={}> deslogueado correctamente.'
 
-_user_parser = reqparse.RequestParser()
+user_schema = UserSchema()
 
-_user_parser.add_argument(
-    'username',
-    type=str,
-    required=True,
-    help=BLANK_ERROR.format('username')
-)
-_user_parser.add_argument(
-    'password',
-    type=str,
-    required=True,
-    help=BLANK_ERROR.format('password')
-)
 class UserRegister(Resource):
     
     @classmethod
     def post(cls):
-        data = _user_parser.parse_args()
+        # data = _user_parser.parse_args()
+        #Al migrar a Flask_Marshmallow, ahora 'user' es un objeto de UserModel
+        user = user_schema.load(request.get_json())
         
-        if UserModel.find_by_username(data['username']):
+        # if UserModel.find_by_username(user['username']):
+        if UserModel.find_by_username(user.username):
             return {'message': NAME_ALREADY_EXISTS}, 409
         
         #Instanciar objeto de UserModel, y se guarda en base de datos con el método llamado 'save_to_db'
         #Al final, sigue siendo POO
         
-        user = UserModel(**data)
+        # user = UserModel(**user)
         # user = UserModel(data['username'], data['password'])
         user.save_to_db()
         
@@ -67,7 +60,8 @@ class User(Resource):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': USER_NOT_FOUND}, 404
-        return user.json()
+        # return user.json()
+        return user_schema.dump(user)
     
     @classmethod
     def delete(cls, user_id):
@@ -80,13 +74,13 @@ class UserLogin(Resource):
     @classmethod
     def post(cls):
         #Obtener data del parser
-        data = _user_parser.parse_args()
+        user_data = user_schema.load(request.get_json())
         
         #Encontrar un usuario en la bd
-        user = UserModel.find_by_username(data['username'])
+        user = UserModel.find_by_username(user_data.username)
         
         #Checkear la contraseña
-        if user and user.password == data['password']:
+        if user and user.password == user_data.password:
             #Crear el token de acceso
             access_token = create_access_token(identity = user.id, fresh=True)
             #Refrescar el token
