@@ -1,23 +1,24 @@
-from typing import Dict, Union
+# from typing import Dict, Union
 from db import db
 
-UserJSON = Dict[str, Union[int, str]]
+# UserJSON = Dict[str, Union[int, str]]
 class UserModel(db.Model):
     #El nombre de la tabla para la base de datos
     __tablename__ = 'users'
     
     #Columnas que tendrá la tabla
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique = True)
-    password = db.Column(db.String(80))
+    username = db.Column(db.String(80), nullable=False, unique = True)
+    password = db.Column(db.String(80), nullable=False)
     ##
     
-    def __init__(self, username: str, password: str) -> None:
-        self.username = username
-        self.password = password
+    # def __init__(self, username: str, password: str) -> None:
+    #     self.username = username
+    #     self.password = password
     
-    def json(self) -> UserJSON:
-        return {'id': self.id, 'username': self.username}
+    ## Este método ya no es requerido si estamos utilizando marshmallow
+    # def json(self) -> UserJSON:
+    #     return {'id': self.id, 'username': self.username}
     
     def save_to_db(self) -> None:
         db.session.add(self)
