@@ -11,7 +11,7 @@ from marshmallow import ValidationError
 from ma import ma
 from db import db
 # from security import authenticate, identity
-from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
+from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout, UserConfirm
 from resources.item import Item, ItemList
 
 ###########################################################
@@ -96,6 +96,7 @@ api.add_resource(StoreList, '/stores')
 api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserLogout, '/logout')
+api.add_resource(UserConfirm, '/user_confirm/<int:user_id>')
 api.add_resource(TokenRefresh, '/refresh')
 
 ##########################################################
@@ -109,4 +110,4 @@ if __name__ == '__main__':
         def create_tables():
             db.create_all()
 
-    app.run(port=5000)
+    app.run(port=5001)

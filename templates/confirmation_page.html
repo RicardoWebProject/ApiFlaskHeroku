@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Confirmación de registro</title>
+        <link href="{{url_for('static', filename='confirmation_page.css')}}" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="jumbotron text-center full-height">
+            <h1>Gracias!</h1>
+            <p><em>Tu registro ha sido confirmado a través del correo < {{ email }} >.</em></p>
+            </div>
+
+            <footer class="text-center">
+            <hr>
+            <p><a href="http://blog.tecladocode.com/" target="_blank">Teclado</a></p>
+            </footer>
+
+        </div>
+    </body>
+</html>
