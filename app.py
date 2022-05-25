@@ -11,8 +11,9 @@ from marshmallow import ValidationError
 from ma import ma
 from db import db
 # from security import authenticate, identity
-from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout, UserConfirm
+from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
 from resources.item import Item, ItemList
+from resources.confirmation import Confirmation, ConfirmationByUser
 
 ###########################################################
 app = Flask(__name__)
@@ -96,8 +97,9 @@ api.add_resource(StoreList, '/stores')
 api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserLogout, '/logout')
-api.add_resource(UserConfirm, '/user_confirm/<int:user_id>')
 api.add_resource(TokenRefresh, '/refresh')
+api.add_resource(Confirmation, '/user_confirmation/<string:confirmation_id>')
+api.add_resource(ConfirmationByUser, '/confirmation/user/<int:user_id>')
 
 ##########################################################
 if __name__ == '__main__':
@@ -110,4 +112,4 @@ if __name__ == '__main__':
         def create_tables():
             db.create_all()
 
-    app.run(port=5001)
+    app.run(port=5000)

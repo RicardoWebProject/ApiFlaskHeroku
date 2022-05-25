@@ -1,7 +1,9 @@
 # from typing import Dict, Union
 from flask import request, url_for
-from requests import Response, post
+from requests import Response
 from db import db
+from libs.mailgun import Mailgun
+from models.confirmation import ConfirmationModel
 
 # UserJSON = Dict[str, Union[int, str]]
 class UserModel(db.Model):
@@ -13,7 +15,8 @@ class UserModel(db.Model):
     username = db.Column(db.String(80), nullable=False, unique = True)
     password = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(80), nullable=False, unique=True)
-    activated = db.Column(db.Boolean, default=False)
+    # activated = db.Column(db.Boolean, default=False) -> mientras tengamos el modelo de confirmation.py, este campo no nos interesa.
+    confirmation = db.relationship('ConfirmationModel', lazy='dynamic', cascade='all, delete-orphan')
     ##
     
     # def __init__(self, username: str, password: str) -> None:
@@ -23,6 +26,10 @@ class UserModel(db.Model):
     ## Este método ya no es requerido si estamos utilizando marshmallow
     # def json(self) -> UserJSON:
     #     return {'id': self.id, 'username': self.username}
+    
+    @property
+    def most_recent_confirmation(self) -> 'ConfirmationModel':
+        return self.confirmation.order_by(db.desc(ConfirmationModel.expire_at).first())
     
     def save_to_db(self) -> None:
         db.session.add(self)
@@ -36,18 +43,14 @@ class UserModel(db.Model):
         #http://127.0.0.1:5000/ -> Esta es la url_root
         #Con [0:-1] decimos que queremos desde la primera posición hasta la última, -1 espacio, por lo que no toma el último slash.
         # -> 'userconfirm' es el nombre del resurce anotado como api.add_resource(UserConfirm, '/user_confirm/<int:user_id>'), en app.py
-        link = request.url_root[0:-1] + url_for('userconfirm', user_id=self.id)
+        # link = request.url_root[0:-1] + url_for('userconfirm', user_id=self.id)
+        link = request.url_root[0:-1] + url_for('confirmation', confirmation_id=self.most_recent_confirmation.id)
         
-        return post(
-            f'https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages',
-            auth=('api', MAILGUN_API_KEY),
-            data={
-                'from': f'{FROM_TITLE} {FROM_EMAIL}',
-                'to': self.email,
-                'subject': 'Confirmación de Registro',
-                'text': f'Por favor, haz click en el enlace para confirmar tu registro: {link}'
-            }
-        )
+        subject = 'Confirmación de Registro',
+        text = f'Por favor, haz click en el enlace para confirmar tu registro: {link}'
+        html = f'<html>Por favor, haz click en el enlace para confirmar tu registro: <a href={link}>Activa tu cuenta</a></html>'
+        
+        return Mailgun.send_email([self.email], subject, text, html)
     
     @classmethod
     def find_by_username(cls, username: str) -> 'UserModel':

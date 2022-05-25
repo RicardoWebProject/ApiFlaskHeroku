@@ -1,0 +1,36 @@
+{
+    "mailgun_failed_load_api_key": "Error al cargar la llave de la API de Mailgun.",
+    "mailgun_failed_load_domain": "Error al cargar el dominio de Mailgun.",
+    "mailgun_error_sending_email": "Error enviando el correo de confirmacion. Registro fallido de usuario.",
+
+    "confirmation_not_found": "Referencia de confirmacion no encontrada",
+    "confirmation_link_expired": "El enlace ha expirado.",
+    "confirmation_already_confirmed" : "El registro ya ha sido confirmado.",
+    "confirmation_resend_fail" : "Error interno del servidor. Fallo al reenviar el email de confirmación.",
+    "confirmation_resend_succesful" : "Correo de confirmación satisfactoriamente reenviado.",
+
+    "item_name_exists" : "Un item con el nombre '{}' ya existe.",
+    "item_not_found" : "Item no econtrado",
+    "item_error_inserting" : "Ha ocurrido un error ingresando el item.",
+    "item_deleted" : "Item eliminado.",
+
+    "store_name_exists" : "Una tienda con el nombre '{}' ya existe.",
+    "store_not_found" : "Tienda no econtrada",
+    "store_error_inserting" : "Ha ocurrido un error ingresando la tienda.",
+    "store_deleted" : "Tienda eliminada.",
+
+    "user_BLANK_ERROR" : "{} no puede estar en blanco.",
+    "user_name_exists" : "El username ya existe. Pruebe con otro.",
+    "user_email_exists" : "El correo electrónico ya existe. Pruebe con otro.",
+    "user_not_found" : "Usuario no econtrado",
+    "user_ERROR_INSERTING" : "Ha ocurrido un error ingresando el Usuario.",
+    "user_deleted" : "Usuario eliminado.",
+    "user_created" : "Usuario creado correctamente",
+    "user_invalid_credentials" : "Credenciales inválidas",
+    "user_logged_out" : "Usuario <id={}> deslogueado correctamente.",
+    "user_not_confirmed" : "No has completado el registro. Por favor, revisa tu correo electronico: <{}> ",
+    "user_USER_CONFIRMED" : "Usuario confirmado.",
+    "user_USER_ALREADY_CONFIRMED" : "Usuario ya confirmado.",
+    "user_error_creating" : "Error interno del servidor. Fallo al crear el usuario."
+
+}

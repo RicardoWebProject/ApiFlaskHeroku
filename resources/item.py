@@ -6,11 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from models.item import ItemModel
 from schemas.item import ItemSchema
 from marshmallow import ValidationError
-
-NAME_ALREADY_EXISTS = 'Un item con el nombre "{}" ya existe.'
-ITEM_NOT_FOUND = 'Item no econtrado'
-ERROR_INSERTING = 'Ha ocurrido un error ingresando el item.'
-ITEM_DELETED = 'Item eliminado.'
+from libs.strings import gettext
 
 item_schema = ItemSchema()
 item_list_schema = ItemSchema(many=True)
@@ -28,14 +24,14 @@ class Item(Resource):
         if item:
             # return item.json()
             return item_schema.dump(item)
-        return {'message': ITEM_NOT_FOUND}, 404
+        return {'message': gettext("item_not_found")}, 404
     
     @classmethod
     @jwt_required(refresh=True)
     def post(cls, name: str):
         if ItemModel.find_by_name(name):
             # return {'message': "An item with name '{}' already exists.".format(name)}, 400
-            return {'message': NAME_ALREADY_EXISTS.format(name)}, 400
+            return {'message': gettext("item_name_exists").format(name)}, 400
 
         # data = Item.parser.parse_args()
         item_json = request.get_json()  #price, store_id
@@ -48,7 +44,7 @@ class Item(Resource):
         try:
             item.save_to_db()
         except:
-            return {"message": ERROR_INSERTING}, 500
+            return {"message": gettext("item_error_inserting")}, 500
 
         return item_schema.dump(item), 201
         # if next(filter(lambda x: x['name'] == name, items), None) is not None:
@@ -75,8 +71,8 @@ class Item(Resource):
         item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
-            return {'message': ITEM_DELETED}
-        return {'message': ITEM_NOT_FOUND}, 404
+            return {'message': gettext("item_deleted")}
+        return {'message': gettext("item_not_found")}, 404
         
         # global items
         # items = list(filter(lambda x: x['name'] != name, items))
