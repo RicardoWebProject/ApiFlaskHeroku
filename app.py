@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, jsonify
 #Un Resource (recurso) es algo que nuestra API puede devolver
 #Cada Resource debe ser una clase
@@ -7,6 +8,7 @@ from flask_jwt_extended import JWTManager
 from blacklist import BLACKLIST
 from resources.store import Store, StoreList
 from marshmallow import ValidationError
+from flask_uploads import configure_uploads, patch_request_class
 
 from ma import ma
 from db import db
@@ -14,32 +16,45 @@ from db import db
 from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
 from resources.item import Item, ItemList
 from resources.confirmation import Confirmation, ConfirmationByUser
+from resources.image import ImageUpload, Image, AvatarUpload, Avatar
+from libs.image_helper import IMAGE_SET
 
 ###########################################################
 app = Flask(__name__)
 
 ###########################################################
-app.config['DEBUG'] = True
+#Esta sección podemos comentarla puesto que toda esta configuración podemos traerla desde los ficheros de entorno (.env o .env.example),
+#si primero le decimos a Flask que traiga dicha información.
+#Esto lo logramos con load_dotenv('.env', verbose=True)
 
-uri = os.getenv('DATABASE_URL')
+# app.config['DEBUG'] = True
 
-if uri is not None:
-    if uri.startswith('postgres://'):
-        uri = uri.replace('postgres://', 'postgresql://', 1)
-        app.config['SQLALCHEMY_DATABASE_URI'] = uri
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+# uri = os.getenv('DATABASE_URL')
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(uri, 'sqlite:///data.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PROPAGATE_EXCEPTIONS'] = True
-# app.config['JWT_BLOCKLIST_ENABLED'] = True
-# app.config['JWT_BLOCKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
-# app.config['JWT_BLACKLIST_ENABLED'] = True
-# app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+# if uri is not None:
+#     if uri.startswith('postgres://'):
+#         uri = uri.replace('postgres://', 'postgresql://', 1)
+#         app.config['SQLALCHEMY_DATABASE_URI'] = uri
+# else:
+#     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 
-##########################################################
-app.secret_key = 'ricardo'  #app.config['JWT_SECRET_KEY']
+# # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(uri, 'sqlite:///data.db')
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['PROPAGATE_EXCEPTIONS'] = True
+# # app.config['JWT_BLOCKLIST_ENABLED'] = True
+# # app.config['JWT_BLOCKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+# # app.config['JWT_BLACKLIST_ENABLED'] = True
+# # app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+# # app.secret_key = 'ricardo'  #app.config['JWT_SECRET_KEY']
+# app.config['JWT_SECRET_KEY'] = os.environ.get('APP_SECRET_KEY')
+
+load_dotenv('.env', verbose=True)
+app.config.from_object('default_config')
+app.config.from_envvar('APPLICATION_SETTINGS')
+patch_request_class(app, 10*1024*1024)  #10 MB como máximo para las imágenes
+configure_uploads(app, IMAGE_SET)
+
+# ##########################################################
 api = Api(app)
 
 @app.errorhandler(ValidationError)
@@ -100,7 +115,10 @@ api.add_resource(UserLogout, '/logout')
 api.add_resource(TokenRefresh, '/refresh')
 api.add_resource(Confirmation, '/user_confirmation/<string:confirmation_id>')
 api.add_resource(ConfirmationByUser, '/confirmation/user/<int:user_id>')
-
+api.add_resource(ImageUpload, '/upload/image')
+api.add_resource(Image, '/image/<string:filename>')
+api.add_resource(AvatarUpload, '/upload/avatar')
+api.add_resource(Avatar, '/avatar/<int:user_id>')
 ##########################################################
 if __name__ == '__main__':
     #iniciación de objeto db para la aplicación Flask
