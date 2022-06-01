@@ -31,6 +31,16 @@
     "user_not_confirmed" : "No has completado el registro. Por favor, revisa tu correo electronico: <{}> ",
     "user_USER_CONFIRMED" : "Usuario confirmado.",
     "user_USER_ALREADY_CONFIRMED" : "Usuario ya confirmado.",
-    "user_error_creating" : "Error interno del servidor. Fallo al crear el usuario."
+    "user_error_creating" : "Error interno del servidor. Fallo al crear el usuario.",
+
+    "image_uploaded": "Imagen {} cargada.",
+    "image_illegal_extension": "Extension '{}' no permitida",
+    "image_illegal_file_name": "Nombre '{}' no permitido",
+    "image_not_found": "Imagen '{}' no encontrada",
+    "image_deleted": "Imagen '{}' eliminada.",
+    "image_delete_failed": "Error al eliminar la imagen.",
+    "avatar_delete_failed": "Error interno del servidor. Error al eliminar el avatar.",
+    "avatar_uploaded": "Avatar '{}' cargado.",
+    "avatar_not_found": "Avatar no encontrado."
 
 }
